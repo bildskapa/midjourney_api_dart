@@ -1,19 +1,21 @@
-import 'package:midjourney_api_dart/src/model/f.dart';
+import 'package:midjourney_api_dart/src/model/function.dart';
 import 'package:midjourney_api_dart/src/model/midjourney_event.dart';
 import 'package:midjourney_api_dart/src/model/midjourney_response.dart';
 
 abstract interface class MidjourneyClient {
-  Future<MidjourneyImagineResponse> imagine({
+  Future<MidjourneyJobResponse> imagine({
     required String prompt,
     required String channelId,
-    required MidjourneyF f,
+    required MidjourneyFunction f,
     String? roomId,
   });
 
-  Future<void> upscale({
+  Future<MidjourneyJobResponse> upscale({
     required String id,
     required String channelId,
-    required MidjourneyF f,
+    required MidjourneyFunction f,
+    required String type,
+    required int index,
     String? roomId,
   });
 }
