@@ -1,3 +1,4 @@
+/// All the events that can be emitted by the Midjourney Websocket
 sealed class MidjourneyWebsocketEvent {}
 
 class MidjourneyWSJobSuccessEvent extends MidjourneyWebsocketEvent {
@@ -7,3 +8,7 @@ class MidjourneyWSJobSuccessEvent extends MidjourneyWebsocketEvent {
 
   final String jobId;
 }
+
+class MidjourneyWSConnectedEvent extends MidjourneyWebsocketEvent {}
+
+class MidjourneyWSDisconnectedEvent extends MidjourneyWebsocketEvent {}
