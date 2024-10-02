@@ -20,12 +20,12 @@ final class MidjourneyClientImpl implements MidjourneyClient {
   Future<MidjourneyJobResponse> imagine({
     required String prompt,
     required String channelId,
-    required MidjourneyFunction f,
+    required MidjourneyFunction function,
     String? roomId,
   }) async {
     final response = await _submitJobs(
       type: 'imagine',
-      function: f,
+      function: function,
       channelId: channelId,
       roomId: roomId,
       body: {
@@ -62,14 +62,14 @@ final class MidjourneyClientImpl implements MidjourneyClient {
   Future<MidjourneyJobResponse> upscale({
     required String id,
     required String channelId,
-    required MidjourneyFunction f,
+    required MidjourneyFunction function,
     required String type,
     required int index,
     String? roomId,
   }) async {
     final response = await _submitJobs(
       type: 'upscale',
-      function: f,
+      function: function,
       channelId: channelId,
       roomId: roomId,
       body: {

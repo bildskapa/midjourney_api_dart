@@ -12,7 +12,7 @@ Future<void> main() async {
   final imagineResponse = await client.imagine(
     prompt: 'Midjourney2 --v 6.1',
     channelId: 'singleplayer_ac61c6c2-ceff-4ec5-b26a-fdac1318f29d',
-    f: MidjourneyFunction(mode: MidjourneyMode.relaxed, private: false),
+    function: MidjourneyFunction(mode: MidjourneyMode.relaxed, private: false),
   );
 
   print(imagineResponse);
