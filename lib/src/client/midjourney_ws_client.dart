@@ -21,17 +21,19 @@ class MidjourneyWSClientImpl implements MidjourneyWSClient {
   final List<MidjourneyWSEventFactory> _eventFactories;
 
   WebSocket? _webSocket;
+  StreamSubscription? _webSocketSubscription;
   final _eventsController = StreamController<MidjourneyWSEvent>.broadcast();
 
   @override
   Future<void> connect({String version = '4'}) async {
     final wsUri = Uri.parse('${_config.wsUrl}?token=${_config.wsUserToken}&v=$version');
     _webSocket = await WebSocket.connect(wsUri);
-    _webSocket!.events.listen(_handleWebSocketEvent);
+    _webSocketSubscription = _webSocket!.events.listen(_handleWebSocketEvent);
   }
 
   @override
   Future<void> disconnect() async {
+    await _webSocketSubscription?.cancel();
     await _webSocket?.close();
     await _eventsController.close();
   }
@@ -39,7 +41,7 @@ class MidjourneyWSClientImpl implements MidjourneyWSClient {
   @override
   Stream<MidjourneyWSEvent> get events => _eventsController.stream;
 
-  /// Handles incoming WebSocket events and converts them to MidjourneyWSEvents.
+  /// Handles incoming [WebSocketEvent] and converts it to [MidjourneyWSEvent].
   void _handleWebSocketEvent(WebSocketEvent event) {
     for (final factory in _eventFactories) {
       final midjourneyEvent = factory.createFromWebSocketEvent(event);
@@ -56,20 +58,21 @@ class MidjourneyWSClientImpl implements MidjourneyWSClient {
       'job_id': jobId,
       'type': 'subscribe_to_job',
     });
+
     _webSocket?.sendBytes(utf8.encode(subscriptionMessage));
   }
 }
 
 /// Abstract interface for creating MidjourneyWSEvents from WebSocketEvents.
-abstract class MidjourneyWSEventFactory {
+abstract interface class MidjourneyWSEventFactory {
   /// Creates a MidjourneyWSEvent from a WebSocketEvent.
   ///
-  /// Returns null if the event cannot be converted.
+  /// Returns null if the event is not recognized by this factory.
   MidjourneyWSEvent? createFromWebSocketEvent(WebSocketEvent event);
 }
 
 /// Factory for creating MidjourneyWSDisconnectedEvents.
-class MidjourneyWSDisconnectedEventFactory implements MidjourneyWSEventFactory {
+final class MidjourneyWSDisconnectedEventFactory implements MidjourneyWSEventFactory {
   @override
   MidjourneyWSEvent? createFromWebSocketEvent(WebSocketEvent event) {
     if (event is CloseReceived) {
@@ -83,7 +86,7 @@ class MidjourneyWSDisconnectedEventFactory implements MidjourneyWSEventFactory {
 }
 
 /// Factory for creating MidjourneyWSJobSuccessEvents.
-class MidjourneyWSJobSuccessEventFactory implements MidjourneyWSEventFactory {
+final class MidjourneyWSJobSuccessEventFactory implements MidjourneyWSEventFactory {
   @override
   MidjourneyWSEvent? createFromWebSocketEvent(WebSocketEvent event) {
     if (event is TextDataReceived) {
@@ -97,7 +100,7 @@ class MidjourneyWSJobSuccessEventFactory implements MidjourneyWSEventFactory {
 }
 
 /// Factory for creating MidjourneyWSGenerationStatusUpdateEvents.
-class MidjourneyWSGenerationStatusUpdateEventFactory implements MidjourneyWSEventFactory {
+final class MidjourneyWSGenerationStatusUpdateEventFactory implements MidjourneyWSEventFactory {
   @override
   MidjourneyWSEvent? createFromWebSocketEvent(WebSocketEvent event) {
     if (event is TextDataReceived) {
