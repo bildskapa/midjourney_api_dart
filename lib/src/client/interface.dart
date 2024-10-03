@@ -1,5 +1,5 @@
 import 'package:midjourney_api_dart/src/model/function.dart';
-import 'package:midjourney_api_dart/src/model/midjourney_event.dart';
+import 'package:midjourney_api_dart/src/model/midjourney_ws_event.dart';
 import 'package:midjourney_api_dart/src/model/midjourney_response.dart';
 
 /// An abstract interface class representing a client for interacting with the Midjourney API.
@@ -45,14 +45,16 @@ abstract interface class MidjourneyWSClient {
   /// If the connection is already established, this method does nothing.
   ///
   /// When disconnected, the client will automatically try to reconnect.
-  Future<void> connect();
+  Future<void> connect({
+    String version = '4',
+  });
 
   /// Disconnects from the websocket server.
   Future<void> disconnect();
 
   /// Stream of midjourney events.
-  Stream<MidjourneyWebsocketEvent> get events;
+  Stream<MidjourneyWSEvent> get events;
 
   /// Subscribes to job updates that are send to the stream.
-  Future<void> subscribeToJob(String jobId);
+  void subscribeToJob(String jobId);
 }

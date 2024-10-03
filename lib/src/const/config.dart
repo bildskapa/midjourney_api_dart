@@ -17,7 +17,9 @@
 class MidjourneyConfig {
   const MidjourneyConfig({
     required this.baseUrl,
+    required this.wsUrl,
     required this.authUserToken,
+    required this.wsUserToken,
   });
 
   /// The base URL of the Midjourney API.
@@ -25,6 +27,14 @@ class MidjourneyConfig {
   /// Example: 'https://api.midjourney.com'
   final String baseUrl;
 
+  /// The websocket URL of the Midjourney API.
+  /// 
+  /// Example: 'wss://ws.midjourney.com/ws'
+  final String wsUrl;
+
   /// The authentication token for the user.
   final String authUserToken;
+
+  /// The authentication token for the user.
+  final String wsUserToken;
 }
