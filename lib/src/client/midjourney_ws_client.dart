@@ -53,13 +53,10 @@ class MidjourneyWSClientImpl implements MidjourneyWSClient {
   }
 
   @override
-  void subscribeToJob(String jobId) {
-    final subscriptionMessage = jsonEncode({
-      'job_id': jobId,
-      'type': 'subscribe_to_job',
-    });
+  void subscribeToJob(String jobId) => _sendCommand({'type': 'subscribe_to_job', 'job_id': jobId});
 
-    _webSocket?.sendBytes(utf8.encode(subscriptionMessage));
+  void _sendCommand(Map<String, Object?> command) {
+    _webSocket?.sendBytes(utf8.encode(jsonEncode(command)));
   }
 }
 
