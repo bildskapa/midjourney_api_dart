@@ -27,7 +27,5 @@ Future<void> main() async {
 
   await midjourneyWSClient.connect();
 
-  midjourneyWSClient.events.listen((event) => print(event));
-
   midjourneyWSClient.subscribeToJob(imagineResponse.success.first.id);
 }

@@ -45,7 +45,12 @@ class MidjourneyWSClientImpl implements MidjourneyWSClient {
 
   /// Handles incoming [WebSocketEvent] and converts it to [MidjourneyWSEvent].
   void _handleWebSocketEvent(WebSocketEvent event) {
-    _config.logger.trace('Received WebSocket event: $event');
+    _config.logger.trace(switch (event) {
+      TextDataReceived() => 'Websocket received text: ${event.text}',
+      BinaryDataReceived() => 'Websocket received binary data: ${event.data.length} bytes',
+      CloseReceived() => 'Websocket closed: ${event.reason}, code: ${event.code}',
+    });
+
     for (final factory in _eventFactories) {
       final midjourneyEvent = factory.createFromWebSocketEvent(event);
       if (midjourneyEvent != null) {
@@ -115,11 +120,27 @@ final class MidjourneyWSGenerationStatusUpdateEventFactory implements Midjourney
       if (currentStatus != null && jobId != null) {
         final percentageComplete = (data?['percentage_complete'] as num?)?.toDouble();
         final status = MidjourneyWSGenerationStatus.fromValue(currentStatus);
+        final imageType = data?['img_type'] as String?;
+        List<MidjourneyWSGenerationImage>? images;
+
+        if (data?['imgs'] case List<Object?> imgs) {
+          images = imgs
+              .whereType<Map<String, Object?>>()
+              .map(
+                (imageJson) => MidjourneyWSGenerationImage(
+                  filename: imageJson['filename'] as String,
+                  data: imageJson['data'] as String,
+                ),
+              )
+              .toList(growable: false);
+        }
 
         return MidjourneyWSGenerationStatusUpdateEvent(
           jobId: jobId,
           status: status,
           percentageComplete: percentageComplete,
+          imageType: imageType,
+          images: images,
         );
       }
     }
