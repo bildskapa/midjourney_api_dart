@@ -29,6 +29,7 @@ class MidjourneyWSClientImpl implements MidjourneyWSClient {
     final wsUri = Uri.parse('${_config.wsUrl}?token=${_config.wsUserToken}&v=$version');
     _webSocket = await WebSocket.connect(wsUri);
     _webSocketSubscription = _webSocket!.events.listen(_handleWebSocketEvent);
+    _config.logger.info('Connected to Midjourney WebSocket at $wsUri');
   }
 
   @override
@@ -36,6 +37,7 @@ class MidjourneyWSClientImpl implements MidjourneyWSClient {
     await _webSocketSubscription?.cancel();
     await _webSocket?.close();
     await _eventsController.close();
+    _config.logger.info('Disconnected from Midjourney WebSocket');
   }
 
   @override
@@ -43,13 +45,17 @@ class MidjourneyWSClientImpl implements MidjourneyWSClient {
 
   /// Handles incoming [WebSocketEvent] and converts it to [MidjourneyWSEvent].
   void _handleWebSocketEvent(WebSocketEvent event) {
+    _config.logger.trace('Received WebSocket event: $event');
     for (final factory in _eventFactories) {
       final midjourneyEvent = factory.createFromWebSocketEvent(event);
       if (midjourneyEvent != null) {
+        _config.logger.trace('Created Midjourney event: $midjourneyEvent');
         _eventsController.add(midjourneyEvent);
         return;
       }
     }
+
+    _config.logger.warn('Unhandled WebSocket event: $event');
   }
 
   @override
@@ -57,6 +63,7 @@ class MidjourneyWSClientImpl implements MidjourneyWSClient {
 
   void _sendCommand(Map<String, Object?> command) {
     _webSocket?.sendBytes(utf8.encode(jsonEncode(command)));
+    _config.logger.trace('Sent command to Midjourney WebSocket: $command');
   }
 }
 

@@ -50,7 +50,10 @@ final class MidjourneyClientImpl implements MidjourneyClient {
       },
     );
 
-    return _parseJobResponse(response);
+    final job = _parseJobResponse(response);
+    _config.logger.trace('Submitted imagine job: $job');
+
+    return job;
   }
 
   /// Submits an 'upscale' job to the Midjourney API.
@@ -87,7 +90,11 @@ final class MidjourneyClientImpl implements MidjourneyClient {
       },
     );
 
-    return _parseJobResponse(response);
+    final job = _parseJobResponse(response);
+
+    _config.logger.trace('Submitted upscale job: $job');
+
+    return job;
   }
 
   /// Submits jobs to the Midjourney API.

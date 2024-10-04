@@ -1,3 +1,5 @@
+import 'package:midjourney_api_dart/src/utils/logger.dart';
+
 /// A configuration class for the Midjourney API.
 ///
 /// This class holds the necessary configuration details required to interact
@@ -15,20 +17,21 @@
 /// - `baseUrl` (String): The base URL of the Midjourney API.
 /// - `authUserToken` (String): The authentication token for the user.
 class MidjourneyConfig {
-  const MidjourneyConfig({
+  MidjourneyConfig({
     required this.baseUrl,
     required this.wsUrl,
     required this.authUserToken,
     required this.wsUserToken,
-  });
+    MidjourneyLogger? logger,
+  }) : logger = logger ?? DefaultMidjourneyLogger();
 
   /// The base URL of the Midjourney API.
-  /// 
+  ///
   /// Example: 'https://api.midjourney.com'
   final String baseUrl;
 
   /// The websocket URL of the Midjourney API.
-  /// 
+  ///
   /// Example: 'wss://ws.midjourney.com/ws'
   final String wsUrl;
 
@@ -37,4 +40,7 @@ class MidjourneyConfig {
 
   /// The authentication token for the user.
   final String wsUserToken;
+
+  /// The logger to use for logging messages.
+  final MidjourneyLogger logger;
 }

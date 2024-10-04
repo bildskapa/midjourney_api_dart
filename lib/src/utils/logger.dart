@@ -11,7 +11,7 @@ import 'package:stack_trace/stack_trace.dart';
 ///
 /// This is a zone-scoped logger, which means that it can be overridden
 /// in nested zones or during tests.
-RefinedLogger get logger => Zone.current[_loggerKey] as RefinedLogger? ?? _logger;
+MidjourneyLogger get logger => Zone.current[_loggerKey] as MidjourneyLogger? ?? _logger;
 
 /// Runs [callback] with the given [logger] instance.
 ///
@@ -21,7 +21,7 @@ RefinedLogger get logger => Zone.current[_loggerKey] as RefinedLogger? ?? _logge
 /// This is useful for testing purposes, where you can pass a mock logger
 /// to the callback.
 void runWithLogger<T>(
-  RefinedLogger logger,
+  MidjourneyLogger logger,
   T Function() callback,
 ) {
   runZoned(
@@ -33,7 +33,7 @@ void runWithLogger<T>(
 const _loggerKey = 'logger';
 
 /// A logger used to log errors in the root zone.
-final _logger = DefaultLogger();
+final _logger = DefaultMidjourneyLogger();
 
 /// Defines the format of a log message.
 ///
@@ -89,7 +89,7 @@ class LoggingOptions {
   final LogFormatter? formatter;
 }
 
-/// Internal class used by [DefaultLogger] to wrap the log messages.
+/// Internal class used by [DefaultMidjourneyLogger] to wrap the log messages.
 class LogWrapper {
   /// Constructs an instance of [LogWrapper].
   LogWrapper({
@@ -109,9 +109,9 @@ class LogWrapper {
 }
 
 /// Logger class, that manages the logging of messages
-class DefaultLogger extends RefinedLogger {
-  /// Constructs an instance of [DefaultLogger].
-  DefaultLogger([LoggingOptions options = const LoggingOptions()]) {
+class DefaultMidjourneyLogger extends MidjourneyLogger {
+  /// Constructs an instance of [DefaultMidjourneyLogger].
+  DefaultMidjourneyLogger([LoggingOptions options = const LoggingOptions()]) {
     _init(options);
   }
 
@@ -214,7 +214,7 @@ class DefaultLogger extends RefinedLogger {
 }
 
 /// Logger class, that manages the logging of messages
-abstract class RefinedLogger {
+abstract class MidjourneyLogger {
   /// Stream of log messages
   Stream<LogMessage> get logs;
 

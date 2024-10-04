@@ -4,6 +4,7 @@ Future<void> main() async {
   final config = MidjourneyConfig(
     baseUrl: 'https://www.midjourney.com',
     wsUrl: 'wss://ws.midjourney.com/ws',
+    logger: DefaultMidjourneyLogger(LoggingOptions(level: LogLevel.trace)),
     wsUserToken:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYWM2MWM2YzItY2VmZi00ZWM1LWIyNmEtZmRhYzEzMThmMjlkIiwidXNlcm5hbWUiOiJtaWNoYWVsbGF6ZWJueSIsImlhdCI6MTcyNzg5Mjg0NH0.FKkRyWQamk_UMlfgvePX_NaYOtrmZZxrbM-1-i-eFI8',
     authUserToken:
