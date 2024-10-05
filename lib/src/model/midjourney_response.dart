@@ -18,12 +18,19 @@ class MidjourneyJobResponse {
   ///
   /// Throws a [FormatException] if the JSON structure is unexpected.
   factory MidjourneyJobResponse.fromJson(Map<String, Object?> json) {
-    if (json case {'success': List<Object?> successList, 'failure': List<Object?> failureList}) {
+    if (json case {'success': List<Object?> success, 'failure': List<Object?> failure}) {
       return MidjourneyJobResponse(
-        success: successList.whereType<Map<String, Object?>>().map(MidjourneyJobSuccess.fromJson).toList(),
-        failure: failureList.whereType<Map<String, Object?>>().map(MidjourneyJobFailure.fromJson).toList(),
+        success: success
+            .whereType<Map<String, Object?>>()
+            .map(MidjourneyJobSuccess.fromJson)
+            .toList(growable: false),
+        failure: failure
+            .whereType<Map<String, Object?>>()
+            .map(MidjourneyJobFailure.fromJson)
+            .toList(growable: false),
       );
     }
+
     throw FormatException('Unexpected JSON structure for MidjourneyImagineResponse', json);
   }
 

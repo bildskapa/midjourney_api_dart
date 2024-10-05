@@ -141,20 +141,6 @@ final class MidjourneyClientImpl implements MidjourneyClient {
   /// Parses the job response from the API.
   ///
   /// This method is used to convert the API response into a [MidjourneyJobResponse] object.
-  MidjourneyJobResponse _parseJobResponse(Map<String, Object?> response) {
-    if (response case {'success': List<Object?> success, 'failure': List<Object?> failure}) {
-      return MidjourneyJobResponse(
-        success: success
-            .whereType<Map<String, Object?>>()
-            .map(MidjourneyJobSuccess.fromJson)
-            .toList(growable: false),
-        failure: failure
-            .whereType<Map<String, Object?>>()
-            .map(MidjourneyJobFailure.fromJson)
-            .toList(growable: false),
-      );
-    }
-
-    throw Exception('Unexpected JSON structure: $response');
-  }
+  MidjourneyJobResponse _parseJobResponse(Map<String, Object?> response) =>
+      MidjourneyJobResponse.fromJson(response);
 }
