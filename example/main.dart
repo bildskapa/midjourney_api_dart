@@ -1,4 +1,5 @@
 import 'package:midjourney_api_dart/api.dart';
+import 'package:midjourney_api_dart/src/model/midjourney_ws_event.dart';
 
 Future<void> main() async {
   final config = MidjourneyConfig(
@@ -28,4 +29,29 @@ Future<void> main() async {
   await midjourneyWSClient.connect();
 
   midjourneyWSClient.subscribeToJob(imagineResponse.success.first.id);
+
+  String? jobId;
+
+  // await for success event
+  await for (final event in midjourneyWSClient.events) {
+    if (event is MidjourneyWSGenerationStatusUpdateEvent && event.percentageComplete == 100) {
+      jobId = event.jobId;
+      break;
+    }
+  }
+
+  if (jobId == null) {
+    throw Exception('Job ID not found');
+  }
+
+  // await for generation status update event
+  final upscaleResponse = await client.upscale(
+    id: jobId,
+    channelId: 'singleplayer_ac61c6c2-ceff-4ec5-b26a-fdac1318f29d',
+    function: MidjourneyFunction(mode: MidjourneyMode.relaxed, private: false),
+    type: 'v6r1_2x_subtle',
+    index: 0,
+  );
+
+  midjourneyWSClient.subscribeToJob(upscaleResponse.success.first.id);
 }

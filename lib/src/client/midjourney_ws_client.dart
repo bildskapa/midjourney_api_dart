@@ -108,7 +108,7 @@ final class MidjourneyWSJobSuccessEventFactory implements MidjourneyWSEventFacto
   }
 }
 
-/// Factory for creating MidjourneyWSGenerationStatusUpdateEvents.
+/// Factory for creating [MidjourneyWSGenerationStatusUpdateEvent].
 final class MidjourneyWSGenerationStatusUpdateEventFactory implements MidjourneyWSEventFactory {
   @override
   MidjourneyWSEvent? createFromWebSocketEvent(WebSocketEvent event) {
