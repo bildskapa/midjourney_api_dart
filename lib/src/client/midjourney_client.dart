@@ -1,10 +1,16 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:midjourney_api_dart/src/client/interface.dart';
-import 'package:midjourney_api_dart/src/const/config.dart';
-import 'package:midjourney_api_dart/src/model/function.dart';
-import 'package:midjourney_api_dart/src/model/midjourney_response.dart';
+import 'package:midjourney_api_dart/api.dart';
+
+/// The configuration provider for the Midjourney API.
+abstract interface class MidjourneyConfigurationProvider {
+  /// Returns the base URL for the Midjourney API.
+  Future<String> getBaseUrl();
+
+  /// Returns the user token for the Midjourney API.
+  Future<String> getAuthUserToken();
+}
 
 /// Implementation of the MidjourneyClient interface.
 /// This class provides methods to interact with the Midjourney API.
@@ -14,12 +20,15 @@ final class MidjourneyClientImpl implements MidjourneyClient {
   /// [config] is required and contains the configuration for the Midjourney API.
   /// [httpClient] is optional and can be provided for custom HTTP handling.
   MidjourneyClientImpl({
-    required MidjourneyConfig config,
+    required MidjourneyConfigurationProvider configurationProvider,
+    required MidjourneyLogger logger,
     http.Client? httpClient,
-  })  : _config = config,
+  })  : _logger = logger,
+        _configurationProvider = configurationProvider,
         _httpClient = httpClient ?? http.Client();
 
-  final MidjourneyConfig _config;
+  final MidjourneyConfigurationProvider _configurationProvider;
+  final MidjourneyLogger _logger;
   final http.Client _httpClient;
 
   /// Submits an 'imagine' job to the Midjourney API.
@@ -51,7 +60,7 @@ final class MidjourneyClientImpl implements MidjourneyClient {
     );
 
     final job = _parseJobResponse(response);
-    _config.logger.trace('Submitted imagine job: $job');
+    _logger.trace('Submitted imagine job: $job');
 
     return job;
   }
@@ -92,7 +101,7 @@ final class MidjourneyClientImpl implements MidjourneyClient {
 
     final job = _parseJobResponse(response);
 
-    _config.logger.trace('Submitted upscale job: $job');
+    _logger.trace('Submitted upscale job: $job');
 
     return job;
   }
@@ -115,11 +124,14 @@ final class MidjourneyClientImpl implements MidjourneyClient {
       ...body,
     });
 
+    final baseUrl = await _configurationProvider.getBaseUrl();
+    final authUserToken = await _configurationProvider.getAuthUserToken();
+
     final response = await _httpClient.post(
-      Uri.parse('${_config.baseUrl}/api/app/submit-jobs'),
+      Uri.parse('$baseUrl/api/app/submit-jobs'),
       body: jsonEncodedBody,
       headers: {
-        'cookie': '__Host-Midjourney.AuthUserToken=${_config.authUserToken}',
+        'cookie': '__Host-Midjourney.AuthUserToken=$authUserToken',
         'content-type': 'application/json',
         'x-csrf-protection': '1',
       },

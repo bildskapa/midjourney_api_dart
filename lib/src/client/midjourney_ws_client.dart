@@ -2,8 +2,16 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:midjourney_api_dart/api.dart';
-import 'package:midjourney_api_dart/src/model/midjourney_ws_event.dart';
 import 'package:web_socket/web_socket.dart';
+
+/// Interface for the Midjourney WebSocket client.
+abstract interface class MidjourneyWSConfigurationProvider {
+  /// Returns the user token for the Midjourney WebSocket.
+  Future<String> getMidjourneyWSToken();
+
+  /// Returns the URL for the Midjourney WebSocket.
+  Future<String> getMidjourneyWSUrl();
+}
 
 /// Implementation of the Midjourney WebSocket client.
 class MidjourneyWSClientImpl implements MidjourneyWSClient {
@@ -12,24 +20,32 @@ class MidjourneyWSClientImpl implements MidjourneyWSClient {
   /// [config] is the configuration for the Midjourney API.
   /// [eventFactories] is a list of factories to create MidjourneyWSEvents.
   MidjourneyWSClientImpl({
-    required MidjourneyConfig config,
     required List<MidjourneyWSEventFactory> eventFactories,
-  })  : _config = config,
-        _eventFactories = eventFactories;
+    required MidjourneyWSConfigurationProvider configurationProvider,
+    MidjourneyLogger? logger,
+  })  : _eventFactories = eventFactories,
+        _configurationProvider = configurationProvider,
+        _logger = logger ?? DefaultMidjourneyLogger();
 
-  final MidjourneyConfig _config;
   final List<MidjourneyWSEventFactory> _eventFactories;
+  final MidjourneyWSConfigurationProvider _configurationProvider;
+  final MidjourneyLogger _logger;
 
   WebSocket? _webSocket;
   StreamSubscription? _webSocketSubscription;
   final _eventsController = StreamController<MidjourneyWSEvent>.broadcast();
 
   @override
-  Future<void> connect({String version = '4'}) async {
-    final wsUri = Uri.parse('${_config.wsUrl}?token=${_config.wsUserToken}&v=$version');
+  Future<void> connect({
+    String version = '4',
+  }) async {
+    final wsUrl = await _configurationProvider.getMidjourneyWSUrl();
+    final wsUserToken = await _configurationProvider.getMidjourneyWSToken();
+
+    final wsUri = Uri.parse('$wsUrl?token=$wsUserToken&v=$version');
     _webSocket = await WebSocket.connect(wsUri);
     _webSocketSubscription = _webSocket!.events.listen(_handleWebSocketEvent);
-    _config.logger.info('Connected to Midjourney WebSocket at $wsUri');
+    _logger.info('Connected to Midjourney WebSocket at $wsUri');
   }
 
   @override
@@ -37,7 +53,7 @@ class MidjourneyWSClientImpl implements MidjourneyWSClient {
     await _webSocketSubscription?.cancel();
     await _webSocket?.close();
     await _eventsController.close();
-    _config.logger.info('Disconnected from Midjourney WebSocket');
+    _logger.info('Disconnected from Midjourney WebSocket');
   }
 
   @override
@@ -45,7 +61,7 @@ class MidjourneyWSClientImpl implements MidjourneyWSClient {
 
   /// Handles incoming [WebSocketEvent] and converts it to [MidjourneyWSEvent].
   void _handleWebSocketEvent(WebSocketEvent event) {
-    _config.logger.trace(switch (event) {
+    _logger.trace(switch (event) {
       TextDataReceived() => 'Websocket received text: ${event.text}',
       BinaryDataReceived() => 'Websocket received binary data: ${event.data.length} bytes',
       CloseReceived() => 'Websocket closed: ${event.reason}, code: ${event.code}',
@@ -54,13 +70,13 @@ class MidjourneyWSClientImpl implements MidjourneyWSClient {
     for (final factory in _eventFactories) {
       final midjourneyEvent = factory.createFromWebSocketEvent(event);
       if (midjourneyEvent != null) {
-        _config.logger.trace('Created Midjourney event: $midjourneyEvent');
+        _logger.trace('Created Midjourney event: $midjourneyEvent');
         _eventsController.add(midjourneyEvent);
         return;
       }
     }
 
-    _config.logger.warn('Unhandled WebSocket event: $event');
+    _logger.warn('Unhandled WebSocket event: $event');
   }
 
   @override
@@ -68,7 +84,7 @@ class MidjourneyWSClientImpl implements MidjourneyWSClient {
 
   void _sendCommand(Map<String, Object?> command) {
     _webSocket?.sendBytes(utf8.encode(jsonEncode(command)));
-    _config.logger.trace('Sent command to Midjourney WebSocket: $command');
+    _logger.trace('Sent command to Midjourney WebSocket: $command');
   }
 }
 
