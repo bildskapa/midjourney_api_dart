@@ -18,7 +18,7 @@ Future<void> main() async {
     function: MidjourneyFunction(mode: MidjourneyMode.relaxed, private: false),
   );
 
-  final midjourneyWSClient = MidjourneyWSClientImpl(
+  final midjourneyWSClient = MidjourneyWSClientBase(
     logger: logger,
     configuration: MidjourneyWSConfiguration(
       wsUrl: 'wss://ws.midjourney.com/ws',

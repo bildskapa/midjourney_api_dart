@@ -17,12 +17,12 @@ class MidjourneyWSConfiguration {
 }
 
 /// Implementation of the Midjourney WebSocket client.
-base class MidjourneyWSClientImpl implements MidjourneyWSClient {
+base class MidjourneyWSClientBase implements MidjourneyWSClient {
   /// Constructor for the MidjourneyWSClientImpl.
   ///
   /// [config] is the configuration for the Midjourney API.
   /// [eventFactories] is a list of factories to create MidjourneyWSEvents.
-  MidjourneyWSClientImpl({
+  MidjourneyWSClientBase({
     required List<MidjourneyWSEventFactory> eventFactories,
     MidjourneyWSConfiguration? configuration,
     MidjourneyLogger? logger,
