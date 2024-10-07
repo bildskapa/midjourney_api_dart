@@ -1,6 +1,4 @@
-import 'package:midjourney_api_dart/src/model/function.dart';
-import 'package:midjourney_api_dart/src/model/midjourney_ws_event.dart';
-import 'package:midjourney_api_dart/src/model/midjourney_response.dart';
+import 'package:midjourney_api_dart/api.dart';
 
 /// An abstract interface class representing a client for interacting with the Midjourney API.
 abstract interface class MidjourneyClient {

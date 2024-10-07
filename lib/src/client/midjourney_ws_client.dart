@@ -5,30 +5,33 @@ import 'package:midjourney_api_dart/api.dart';
 import 'package:web_socket/web_socket.dart';
 
 /// Interface for the Midjourney WebSocket client.
-abstract interface class MidjourneyWSConfigurationProvider {
-  /// Returns the user token for the Midjourney WebSocket.
-  Future<String> getMidjourneyWSToken();
+class MidjourneyWSConfiguration {
+  /// Creates a new instance of [MidjourneyWSConfiguration].
+  const MidjourneyWSConfiguration({
+    required this.wsUrl,
+    required this.wsToken,
+  });
 
-  /// Returns the URL for the Midjourney WebSocket.
-  Future<String> getMidjourneyWSUrl();
+  final String wsUrl;
+  final String wsToken;
 }
 
 /// Implementation of the Midjourney WebSocket client.
-class MidjourneyWSClientImpl implements MidjourneyWSClient {
+base class MidjourneyWSClientImpl implements MidjourneyWSClient {
   /// Constructor for the MidjourneyWSClientImpl.
   ///
   /// [config] is the configuration for the Midjourney API.
   /// [eventFactories] is a list of factories to create MidjourneyWSEvents.
   MidjourneyWSClientImpl({
     required List<MidjourneyWSEventFactory> eventFactories,
-    required MidjourneyWSConfigurationProvider configurationProvider,
+    MidjourneyWSConfiguration? configuration,
     MidjourneyLogger? logger,
   })  : _eventFactories = eventFactories,
-        _configurationProvider = configurationProvider,
+        _configuration = configuration,
         _logger = logger ?? DefaultMidjourneyLogger();
 
   final List<MidjourneyWSEventFactory> _eventFactories;
-  final MidjourneyWSConfigurationProvider _configurationProvider;
+  final MidjourneyWSConfiguration? _configuration;
   final MidjourneyLogger _logger;
 
   WebSocket? _webSocket;
@@ -38,9 +41,16 @@ class MidjourneyWSClientImpl implements MidjourneyWSClient {
   @override
   Future<void> connect({
     String version = '4',
+    MidjourneyWSConfiguration? configuration,
   }) async {
-    final wsUrl = await _configurationProvider.getMidjourneyWSUrl();
-    final wsUserToken = await _configurationProvider.getMidjourneyWSToken();
+    final effectiveConfiguration = configuration ?? _configuration;
+
+    if (effectiveConfiguration == null) {
+      throw StateError('No configuration provided');
+    }
+
+    final wsUrl = effectiveConfiguration.wsUrl;
+    final wsUserToken = effectiveConfiguration.wsToken;
 
     final wsUri = Uri.parse('$wsUrl?token=$wsUserToken&v=$version');
     _webSocket = await WebSocket.connect(wsUri);

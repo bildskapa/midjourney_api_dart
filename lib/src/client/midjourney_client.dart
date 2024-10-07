@@ -4,30 +4,33 @@ import 'package:http/http.dart' as http;
 import 'package:midjourney_api_dart/api.dart';
 
 /// The configuration provider for the Midjourney API.
-abstract interface class MidjourneyConfigurationProvider {
-  /// Returns the base URL for the Midjourney API.
-  Future<String> getBaseUrl();
+class MidjourneyConfiguration {
+  /// Creates a new instance of [MidjourneyConfiguration].
+  const MidjourneyConfiguration({
+    required this.authUserToken,
+    required this.baseUrl,
+  });
 
-  /// Returns the user token for the Midjourney API.
-  Future<String> getAuthUserToken();
+  final String authUserToken;
+  final String baseUrl;
 }
 
 /// Implementation of the MidjourneyClient interface.
 /// This class provides methods to interact with the Midjourney API.
-final class MidjourneyClientImpl implements MidjourneyClient {
-  /// Creates a new instance of [MidjourneyClientImpl].
+base class MidjourneyClientBase implements MidjourneyClient {
+  /// Creates a new instance of [MidjourneyClientBase].
   ///
   /// [config] is required and contains the configuration for the Midjourney API.
   /// [httpClient] is optional and can be provided for custom HTTP handling.
-  MidjourneyClientImpl({
-    required MidjourneyConfigurationProvider configurationProvider,
+  MidjourneyClientBase({
     required MidjourneyLogger logger,
+    MidjourneyConfiguration? configuration,
     http.Client? httpClient,
   })  : _logger = logger,
-        _configurationProvider = configurationProvider,
+        _configuration = configuration,
         _httpClient = httpClient ?? http.Client();
 
-  final MidjourneyConfigurationProvider _configurationProvider;
+  final MidjourneyConfiguration? _configuration;
   final MidjourneyLogger _logger;
   final http.Client _httpClient;
 
@@ -42,6 +45,7 @@ final class MidjourneyClientImpl implements MidjourneyClient {
     required String prompt,
     required String channelId,
     required MidjourneyFunction function,
+    MidjourneyConfiguration? configuration,
     String? roomId,
   }) async {
     final response = await _submitJobs(
@@ -80,6 +84,7 @@ final class MidjourneyClientImpl implements MidjourneyClient {
     required MidjourneyFunction function,
     required String type,
     required int index,
+    MidjourneyConfiguration? configuration,
     String? roomId,
   }) async {
     final response = await _submitJobs(
@@ -114,8 +119,15 @@ final class MidjourneyClientImpl implements MidjourneyClient {
     required String channelId,
     required MidjourneyFunction function,
     required Map<String, Object?> body,
+    MidjourneyConfiguration? configuration,
     String? roomId,
   }) async {
+    final effectiveConfiguration = configuration ?? _configuration;
+
+    if (effectiveConfiguration == null) {
+      throw StateError('Configuration is required, but was not provided');
+    }
+
     final jsonEncodedBody = jsonEncode({
       't': type,
       'f': function.toJson(),
@@ -124,8 +136,8 @@ final class MidjourneyClientImpl implements MidjourneyClient {
       ...body,
     });
 
-    final baseUrl = await _configurationProvider.getBaseUrl();
-    final authUserToken = await _configurationProvider.getAuthUserToken();
+    final baseUrl = effectiveConfiguration.baseUrl;
+    final authUserToken = effectiveConfiguration.authUserToken;
 
     final response = await _httpClient.post(
       Uri.parse('$baseUrl/api/app/submit-jobs'),
