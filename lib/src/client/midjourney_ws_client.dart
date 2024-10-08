@@ -62,7 +62,6 @@ base class MidjourneyWSClientBase implements MidjourneyWSClient {
   Future<void> disconnect() async {
     await _webSocketSubscription?.cancel();
     await _webSocket?.close();
-    await _eventsController.close();
     _webSocket = null;
     _webSocketSubscription = null;
     _logger.info('Disconnected from Midjourney WebSocket');
@@ -97,6 +96,11 @@ base class MidjourneyWSClientBase implements MidjourneyWSClient {
   void _sendCommand(Map<String, Object?> command) {
     _webSocket?.sendBytes(utf8.encode(jsonEncode(command)));
     _logger.trace('Sent command to Midjourney WebSocket: $command');
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _eventsController.close();
   }
 }
 

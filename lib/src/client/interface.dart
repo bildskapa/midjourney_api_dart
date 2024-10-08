@@ -50,6 +50,9 @@ abstract interface class MidjourneyWSClient {
   /// Disconnects from the websocket server.
   Future<void> disconnect();
 
+  /// Disposes client resources.
+  Future<void> dispose();
+
   /// Stream of midjourney events.
   Stream<MidjourneyWSEvent> get events;
 
