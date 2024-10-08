@@ -63,6 +63,8 @@ base class MidjourneyWSClientBase implements MidjourneyWSClient {
     await _webSocketSubscription?.cancel();
     await _webSocket?.close();
     await _eventsController.close();
+    _webSocket = null;
+    _webSocketSubscription = null;
     _logger.info('Disconnected from Midjourney WebSocket');
   }
 
