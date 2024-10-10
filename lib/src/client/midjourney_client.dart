@@ -53,6 +53,7 @@ base class MidjourneyClientBase implements MidjourneyClient {
       function: function,
       channelId: channelId,
       roomId: roomId,
+      configuration: configuration,
       body: {
         'prompt': prompt,
         'metadata': {
@@ -92,6 +93,7 @@ base class MidjourneyClientBase implements MidjourneyClient {
       function: function,
       channelId: channelId,
       roomId: roomId,
+      configuration: configuration,
       body: {
         'id': id,
         'type': type,
@@ -119,7 +121,7 @@ base class MidjourneyClientBase implements MidjourneyClient {
     required String channelId,
     required MidjourneyFunction function,
     required Map<String, Object?> body,
-    MidjourneyConfiguration? configuration,
+    required MidjourneyConfiguration? configuration,
     String? roomId,
   }) async {
     final effectiveConfiguration = configuration ?? _configuration;
