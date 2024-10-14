@@ -1,4 +1,5 @@
 import 'package:midjourney_api_dart/api.dart';
+import 'package:midjourney_api_dart/src/model/thomas_job.dart';
 
 /// An abstract interface class representing a client for interacting with the Midjourney API.
 abstract interface class MidjourneyClient {
@@ -34,6 +35,11 @@ abstract interface class MidjourneyClient {
     required String type,
     required int index,
     String? roomId,
+  });
+
+  /// Sends a getJobs request to the Midjourney API.
+  Future<ThomasJobResponse> getJobs({
+    required int pageSize,
   });
 }
 

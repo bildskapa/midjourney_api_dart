@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:midjourney_api_dart/api.dart';
+import 'package:midjourney_api_dart/src/model/thomas_job.dart';
+import 'package:midjourney_api_dart/src/utils/token_validator.dart';
 
 /// The configuration provider for the Midjourney API.
 class MidjourneyConfiguration {
@@ -33,6 +35,43 @@ base class MidjourneyClientBase implements MidjourneyClient {
   final MidjourneyConfiguration? _configuration;
   final MidjourneyLogger _logger;
   final http.Client _httpClient;
+
+  @override
+  Future<ThomasJobResponse> getJobs({
+    required int pageSize,
+    MidjourneyConfiguration? configuration,
+  }) async {
+    final effectiveConfiguration = _configuration;
+
+    if (effectiveConfiguration == null) {
+      throw StateError('Configuration is required, but was not provided');
+    }
+
+    final decodedToken =
+        const TokenValidator().validateAndDecodeAuthToken(effectiveConfiguration.authUserToken);
+    final userId = decodedToken.idTokenDecoded.midjourneyId;
+
+    final response = await _httpClient.get(
+      Uri.parse('${effectiveConfiguration.baseUrl}/api/pg/thomas-jobs?userId=$userId&page_size=$pageSize'),
+      headers: {
+        'cookie': '__Host-Midjourney.AuthUserToken=${effectiveConfiguration.authUserToken}',
+        'content-type': 'application/json',
+        'x-csrf-protection': '1',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to get jobs: ${response.statusCode} ${response.body}');
+    }
+
+    final json = jsonDecode(response.body);
+
+    if (json is! Map<String, Object?>) {
+      throw Exception('Unexpected JSON structure: $json');
+    }
+
+    return ThomasJobResponse.fromJson(json);
+  }
 
   /// Submits an 'imagine' job to the Midjourney API.
   ///
