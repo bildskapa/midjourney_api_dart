@@ -41,7 +41,7 @@ base class MidjourneyClientBase implements MidjourneyClient {
     required int pageSize,
     MidjourneyConfiguration? configuration,
   }) async {
-    final effectiveConfiguration = _configuration;
+    final effectiveConfiguration = configuration ?? _configuration;
 
     if (effectiveConfiguration == null) {
       throw StateError('Configuration is required, but was not provided');
