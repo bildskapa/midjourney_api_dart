@@ -52,7 +52,7 @@ base class MidjourneyClientBase implements MidjourneyClient {
     final userId = decodedToken.idTokenDecoded.midjourneyId;
 
     final response = await _httpClient.get(
-      Uri.parse('${effectiveConfiguration.baseUrl}/api/pg/thomas-jobs?userId=$userId&page_size=$pageSize'),
+      Uri.parse('${effectiveConfiguration.baseUrl}/api/pg/thomas-jobs?user_id=$userId&page_size=$pageSize'),
       headers: {
         'cookie': '__Host-Midjourney.AuthUserToken=${effectiveConfiguration.authUserToken}',
         'content-type': 'application/json',
