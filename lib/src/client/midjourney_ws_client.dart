@@ -46,15 +46,15 @@ base class MidjourneyWSClientBase implements MidjourneyWSClient {
   MidjourneyWSClientConfiguration? _configuration;
 
   /// The effective configuration for the Midjourney API.
-  MidjourneyWSClientConfiguration get _effectiveConfiguration =>
+  MidjourneyWSClientConfiguration get effectiveConfiguration =>
       _configuration ?? (throw Exception('Configuration not set'));
 
   @override
   Future<void> connect({
     String version = '4',
   }) async {
-    final wsUrl = _effectiveConfiguration.wsUrl;
-    final wsUserToken = _effectiveConfiguration.wsToken;
+    final wsUrl = effectiveConfiguration.wsUrl;
+    final wsUserToken = effectiveConfiguration.wsToken;
 
     final wsUri = Uri.parse('$wsUrl?token=$wsUserToken&v=$version');
     _webSocket = await WebSocket.connect(wsUri);

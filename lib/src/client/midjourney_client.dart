@@ -45,7 +45,7 @@ base class MidjourneyClientBase implements MidjourneyClient {
     _configuration = config;
   }
 
-  MidjourneyClientConfiguration get _effectiveConfiguration =>
+  MidjourneyClientConfiguration get effectiveConfiguration =>
       _configuration ?? (throw Exception('Configuration not set'));
 
   @override
@@ -53,16 +53,16 @@ base class MidjourneyClientBase implements MidjourneyClient {
     required int pageSize,
   }) async {
     final decodedToken = const TokenValidator().validateAndDecodeAuthTokenV3I(
-      _effectiveConfiguration.authUserTokenV3I,
+      effectiveConfiguration.authUserTokenV3I,
     );
 
     final userId = decodedToken.midjourneyId;
 
     final response = await _httpClient.get(
-      Uri.parse('${_effectiveConfiguration.baseUrl}/api/pg/thomas-jobs?user_id=$userId&page_size=$pageSize'),
+      Uri.parse('${effectiveConfiguration.baseUrl}/api/pg/thomas-jobs?user_id=$userId&page_size=$pageSize'),
       headers: _getAuthHeaders(
-        authUserTokenV3I: _effectiveConfiguration.authUserTokenV3I,
-        authUserTokenV3R: _effectiveConfiguration.authUserTokenV3R,
+        authUserTokenV3I: effectiveConfiguration.authUserTokenV3I,
+        authUserTokenV3R: effectiveConfiguration.authUserTokenV3R,
       ),
     );
 
@@ -172,11 +172,11 @@ base class MidjourneyClientBase implements MidjourneyClient {
     });
 
     final response = await _httpClient.post(
-      Uri.parse('${_effectiveConfiguration.baseUrl}/api/app/submit-jobs'),
+      Uri.parse('${effectiveConfiguration.baseUrl}/api/app/submit-jobs'),
       body: jsonEncodedBody,
       headers: _getAuthHeaders(
-        authUserTokenV3I: _effectiveConfiguration.authUserTokenV3I,
-        authUserTokenV3R: _effectiveConfiguration.authUserTokenV3R,
+        authUserTokenV3I: effectiveConfiguration.authUserTokenV3I,
+        authUserTokenV3R: effectiveConfiguration.authUserTokenV3R,
       ),
     );
 
@@ -220,7 +220,7 @@ base class MidjourneyClientBase implements MidjourneyClient {
       _configuration = MidjourneyClientConfiguration(
         authUserTokenV3I: authTokenV3I,
         authUserTokenV3R: authTokenV3R,
-        baseUrl: _effectiveConfiguration.baseUrl,
+        baseUrl: effectiveConfiguration.baseUrl,
       );
     }
   }
