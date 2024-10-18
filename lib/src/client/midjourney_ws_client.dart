@@ -5,14 +5,17 @@ import 'package:midjourney_api_dart/api.dart';
 import 'package:web_socket/web_socket.dart';
 
 /// Interface for the Midjourney WebSocket client.
-class MidjourneyWSConfiguration {
-  /// Creates a new instance of [MidjourneyWSConfiguration].
-  const MidjourneyWSConfiguration({
+class MidjourneyWSClientConfiguration {
+  /// Creates a new instance of [MidjourneyWSClientConfiguration].
+  const MidjourneyWSClientConfiguration({
     required this.wsUrl,
     required this.wsToken,
   });
 
+  /// The WebSocket URL for the Midjourney API.
   final String wsUrl;
+
+  /// The WebSocket token for the user.
   final String wsToken;
 }
 
@@ -24,33 +27,34 @@ base class MidjourneyWSClientBase implements MidjourneyWSClient {
   /// [eventFactories] is a list of factories to create MidjourneyWSEvents.
   MidjourneyWSClientBase({
     required List<MidjourneyWSEventFactory> eventFactories,
-    MidjourneyWSConfiguration? configuration,
     MidjourneyLogger? logger,
   })  : _eventFactories = eventFactories,
-        _configuration = configuration,
         _logger = logger ?? DefaultMidjourneyLogger();
 
   final List<MidjourneyWSEventFactory> _eventFactories;
-  final MidjourneyWSConfiguration? _configuration;
   final MidjourneyLogger _logger;
 
   WebSocket? _webSocket;
   StreamSubscription? _webSocketSubscription;
   final _eventsController = StreamController<MidjourneyWSEvent>.broadcast();
 
+  set configuration(MidjourneyWSClientConfiguration config) {
+    _configuration = config;
+  }
+
+  /// The configuration for the Midjourney API.
+  MidjourneyWSClientConfiguration? _configuration;
+
+  /// The effective configuration for the Midjourney API.
+  MidjourneyWSClientConfiguration get _effectiveConfiguration =>
+      _configuration ?? (throw Exception('Configuration not set'));
+
   @override
   Future<void> connect({
     String version = '4',
-    MidjourneyWSConfiguration? configuration,
   }) async {
-    final effectiveConfiguration = configuration ?? _configuration;
-
-    if (effectiveConfiguration == null) {
-      throw StateError('No configuration provided');
-    }
-
-    final wsUrl = effectiveConfiguration.wsUrl;
-    final wsUserToken = effectiveConfiguration.wsToken;
+    final wsUrl = _effectiveConfiguration.wsUrl;
+    final wsUserToken = _effectiveConfiguration.wsToken;
 
     final wsUri = Uri.parse('$wsUrl?token=$wsUserToken&v=$version');
     _webSocket = await WebSocket.connect(wsUri);

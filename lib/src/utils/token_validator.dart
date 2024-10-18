@@ -9,29 +9,25 @@ class TokenValidator {
   ///
   /// The token is expected to be in JWT format. It first decodes the outer token
   /// and validates that it contains an expected Firebase structure.
-  /// If valid, it further decodes the inner `idToken` and returns a [DecodedAuthToken] object.
+  /// If valid, it further decodes the inner `idToken` and returns a [DecodedAuthTokenV3I] object.
   ///
   /// Throws an [InvalidTokenException] if the token is invalid or improperly formatted.
   ///
   /// [token] - The JWT token to be validated and decoded.
-  DecodedAuthToken validateAndDecodeAuthToken(String token) {
+  DecodedAuthTokenV3I validateAndDecodeAuthTokenV3I(String token) {
     try {
-      final outerToken = _decodeToken(token);
+      final outerToken = _decodeJWTToken(token);
 
       if (outerToken
           case {
-            'type': 'firebase',
-            'idToken': final String idToken,
-            'refreshToken': final String refreshToken,
-            'iat': final int iat
+            'midjourney_id': final String midjourneyId,
+            'iat': final int iat,
+            'exp': final int exp,
           }) {
-        final innerToken = _decodeToken(idToken);
-        return DecodedAuthToken(
-          type: 'firebase',
-          refreshToken: refreshToken,
+        return DecodedAuthTokenV3I(
+          midjourneyId: midjourneyId,
           iat: DateTime.fromMillisecondsSinceEpoch(iat * 1000),
-          idTokenDecoded: DecodedIdToken.fromJson(innerToken),
-          idTokenEncoded: idToken,
+          exp: DateTime.fromMillisecondsSinceEpoch(exp * 1000),
         );
       } else {
         throw const InvalidTokenException('Invalid token structure');
@@ -51,7 +47,7 @@ class TokenValidator {
   /// Throws an [InvalidTokenException] if the token is invalid or improperly formatted.
   DecodedWSToken validateAndDecodeWSToken(String token) {
     try {
-      final decodedToken = _decodeToken(token);
+      final decodedToken = _decodeJWTToken(token);
 
       if (decodedToken
           case {
@@ -80,7 +76,7 @@ class TokenValidator {
   /// Throws an [InvalidTokenException] if the token doesn't contain exactly 3 parts.
   ///
   /// [token] - The JWT token to decode.
-  Map<String, Object?> _decodeToken(String token) {
+  Map<String, Object?> _decodeJWTToken(String token) {
     final parts = token.split('.');
     if (parts.length != 3) {
       throw const InvalidTokenException('Token must have 3 parts');
@@ -115,63 +111,9 @@ class DecodedWSToken {
 }
 
 /// A class that represents a decoded authentication token.
-///
-/// Contains information such as the type of token, refresh token, issued-at time [iat],
-/// and the decoded inner ID token [idTokenDecoded].
-class DecodedAuthToken {
-  /// The type of the token, typically 'firebase'.
-  final String type;
-
+class DecodedAuthTokenV3I {
   /// The refresh token, used to obtain new authentication tokens.
-  final String refreshToken;
-
-  /// The issued-at time (iat) of the token, represented as a [DateTime].
-  final DateTime iat;
-
-  /// The decoded inner ID token containing user information.
-  final DecodedIdToken idTokenDecoded;
-
-  /// The encoded ID token.
-  final String idTokenEncoded;
-
-  /// Creates a [DecodedAuthToken] with the provided attributes.
-  DecodedAuthToken({
-    required this.type,
-    required this.refreshToken,
-    required this.iat,
-    required this.idTokenDecoded,
-    required this.idTokenEncoded,
-  });
-}
-
-/// A class representing the decoded ID token, which contains user-specific information.
-///
-/// This class holds various user attributes such as name, email, picture, and authentication details,
-/// as well as Firebase-specific information.
-class DecodedIdToken {
-  /// The user's name.
-  final String name;
-
-  /// The URL to the user's profile picture.
-  final String picture;
-
-  /// The user's Midjourney ID.
   final String midjourneyId;
-
-  /// The issuer of the token (iss), typically the Firebase project.
-  final String iss;
-
-  /// The audience of the token (aud), typically the Firebase project ID.
-  final String aud;
-
-  /// The time the user was authenticated (auth_time), represented as a [DateTime].
-  final DateTime authTime;
-
-  /// The user's unique ID in Firebase.
-  final String userId;
-
-  /// The subject of the token (sub), typically the user's unique identifier.
-  final String sub;
 
   /// The issued-at time (iat) of the token, represented as a [DateTime].
   final DateTime iat;
@@ -179,45 +121,12 @@ class DecodedIdToken {
   /// The expiration time (exp) of the token, represented as a [DateTime].
   final DateTime exp;
 
-  /// The user's email address.
-  final String email;
-
-  /// Whether the user's email has been verified.
-  final bool emailVerified;
-
-  /// Creates a [DecodedIdToken] with the provided attributes.
-  DecodedIdToken({
-    required this.name,
-    required this.picture,
+  /// Creates a [DecodedAuthTokenV3I] with the provided attributes.
+  DecodedAuthTokenV3I({
     required this.midjourneyId,
-    required this.iss,
-    required this.aud,
-    required this.authTime,
-    required this.userId,
-    required this.sub,
     required this.iat,
     required this.exp,
-    required this.email,
-    required this.emailVerified,
   });
-
-  /// Factory constructor to create a [DecodedIdToken] instance from a JSON map.
-  ///
-  /// This parses various fields, including timestamps.
-  factory DecodedIdToken.fromJson(Map<String, Object?> json) => DecodedIdToken(
-        name: json['name']! as String,
-        picture: json['picture']! as String,
-        midjourneyId: json['midjourney_id']! as String,
-        iss: json['iss']! as String,
-        aud: json['aud']! as String,
-        authTime: DateTime.fromMillisecondsSinceEpoch((json['auth_time']! as int) * 1000),
-        userId: json['user_id']! as String,
-        sub: json['sub']! as String,
-        iat: DateTime.fromMillisecondsSinceEpoch((json['iat']! as int) * 1000),
-        exp: DateTime.fromMillisecondsSinceEpoch((json['exp']! as int) * 1000),
-        email: json['email']! as String,
-        emailVerified: json['email_verified']! as bool,
-      );
 }
 
 /// An abstract sealed class for exceptions related to token validation.

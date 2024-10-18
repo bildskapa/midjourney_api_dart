@@ -2,18 +2,24 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:midjourney_api_dart/api.dart';
-import 'package:midjourney_api_dart/src/model/thomas_job.dart';
 import 'package:midjourney_api_dart/src/utils/token_validator.dart';
 
 /// The configuration provider for the Midjourney API.
-class MidjourneyConfiguration {
-  /// Creates a new instance of [MidjourneyConfiguration].
-  const MidjourneyConfiguration({
-    required this.authUserToken,
+class MidjourneyClientConfiguration {
+  /// Creates a new instance of [MidjourneyClientConfiguration].
+  const MidjourneyClientConfiguration({
+    required this.authUserTokenV3I,
+    required this.authUserTokenV3R,
     required this.baseUrl,
   });
 
-  final String authUserToken;
+  /// The authentication token for the user.
+  final String authUserTokenV3I;
+
+  /// The refresh token for the user.
+  final String authUserTokenV3R;
+
+  /// The base URL for the Midjourney API.
   final String baseUrl;
 }
 
@@ -26,38 +32,38 @@ base class MidjourneyClientBase implements MidjourneyClient {
   /// [httpClient] is optional and can be provided for custom HTTP handling.
   MidjourneyClientBase({
     required MidjourneyLogger logger,
-    MidjourneyConfiguration? configuration,
     http.Client? httpClient,
   })  : _logger = logger,
-        _configuration = configuration,
         _httpClient = httpClient ?? http.Client();
 
-  final MidjourneyConfiguration? _configuration;
   final MidjourneyLogger _logger;
   final http.Client _httpClient;
+
+  MidjourneyClientConfiguration? _configuration;
+
+  set configuration(MidjourneyClientConfiguration config) {
+    _configuration = config;
+  }
+
+  MidjourneyClientConfiguration get _effectiveConfiguration =>
+      _configuration ?? (throw Exception('Configuration not set'));
 
   @override
   Future<ThomasJobResponse> getJobs({
     required int pageSize,
-    MidjourneyConfiguration? configuration,
   }) async {
-    final effectiveConfiguration = configuration ?? _configuration;
+    final decodedToken = const TokenValidator().validateAndDecodeAuthTokenV3I(
+      _effectiveConfiguration.authUserTokenV3I,
+    );
 
-    if (effectiveConfiguration == null) {
-      throw StateError('Configuration is required, but was not provided');
-    }
-
-    final decodedToken =
-        const TokenValidator().validateAndDecodeAuthToken(effectiveConfiguration.authUserToken);
-    final userId = decodedToken.idTokenDecoded.midjourneyId;
+    final userId = decodedToken.midjourneyId;
 
     final response = await _httpClient.get(
-      Uri.parse('${effectiveConfiguration.baseUrl}/api/pg/thomas-jobs?user_id=$userId&page_size=$pageSize'),
-      headers: {
-        'cookie': '__Host-Midjourney.AuthUserToken=${effectiveConfiguration.authUserToken}',
-        'content-type': 'application/json',
-        'x-csrf-protection': '1',
-      },
+      Uri.parse('${_effectiveConfiguration.baseUrl}/api/pg/thomas-jobs?user_id=$userId&page_size=$pageSize'),
+      headers: _getAuthHeaders(
+        authUserTokenV3I: _effectiveConfiguration.authUserTokenV3I,
+        authUserTokenV3R: _effectiveConfiguration.authUserTokenV3R,
+      ),
     );
 
     if (response.statusCode != 200) {
@@ -84,7 +90,6 @@ base class MidjourneyClientBase implements MidjourneyClient {
     required String prompt,
     required String channelId,
     required MidjourneyFunction function,
-    MidjourneyConfiguration? configuration,
     String? roomId,
   }) async {
     final response = await _submitJobs(
@@ -92,7 +97,6 @@ base class MidjourneyClientBase implements MidjourneyClient {
       function: function,
       channelId: channelId,
       roomId: roomId,
-      configuration: configuration,
       body: {
         'prompt': prompt,
         'metadata': {
@@ -124,7 +128,6 @@ base class MidjourneyClientBase implements MidjourneyClient {
     required MidjourneyFunction function,
     required String type,
     required int index,
-    MidjourneyConfiguration? configuration,
     String? roomId,
   }) async {
     final response = await _submitJobs(
@@ -132,7 +135,6 @@ base class MidjourneyClientBase implements MidjourneyClient {
       function: function,
       channelId: channelId,
       roomId: roomId,
-      configuration: configuration,
       body: {
         'id': id,
         'type': type,
@@ -160,15 +162,8 @@ base class MidjourneyClientBase implements MidjourneyClient {
     required String channelId,
     required MidjourneyFunction function,
     required Map<String, Object?> body,
-    required MidjourneyConfiguration? configuration,
     String? roomId,
   }) async {
-    final effectiveConfiguration = configuration ?? _configuration;
-
-    if (effectiveConfiguration == null) {
-      throw StateError('Configuration is required, but was not provided');
-    }
-
     final jsonEncodedBody = jsonEncode({
       't': type,
       'f': function.toJson(),
@@ -177,17 +172,13 @@ base class MidjourneyClientBase implements MidjourneyClient {
       ...body,
     });
 
-    final baseUrl = effectiveConfiguration.baseUrl;
-    final authUserToken = effectiveConfiguration.authUserToken;
-
     final response = await _httpClient.post(
-      Uri.parse('$baseUrl/api/app/submit-jobs'),
+      Uri.parse('${_effectiveConfiguration.baseUrl}/api/app/submit-jobs'),
       body: jsonEncodedBody,
-      headers: {
-        'cookie': '__Host-Midjourney.AuthUserToken=$authUserToken',
-        'content-type': 'application/json',
-        'x-csrf-protection': '1',
-      },
+      headers: _getAuthHeaders(
+        authUserTokenV3I: _effectiveConfiguration.authUserTokenV3I,
+        authUserTokenV3R: _effectiveConfiguration.authUserTokenV3R,
+      ),
     );
 
     if (response.statusCode != 200) {
@@ -201,6 +192,21 @@ base class MidjourneyClientBase implements MidjourneyClient {
     }
 
     return json;
+  }
+
+  Map<String, String> _getAuthHeaders({
+    required String authUserTokenV3I,
+    required String authUserTokenV3R,
+  }) {
+    final cookieBuilder = StringBuffer();
+    cookieBuilder.write('__Host-Midjourney.AuthUserTokenV3_i=$authUserTokenV3I; ');
+    cookieBuilder.write('__Host-Midjourney.AuthUserTokenV3_r=$authUserTokenV3R');
+
+    return {
+      'cookie': cookieBuilder.toString(),
+      'content-type': 'application/json',
+      'x-csrf-protection': '1',
+    };
   }
 
   /// Parses the job response from the API.

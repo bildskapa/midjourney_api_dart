@@ -1,5 +1,4 @@
 import 'package:midjourney_api_dart/api.dart';
-import 'package:midjourney_api_dart/src/model/thomas_job.dart';
 
 /// An abstract interface class representing a client for interacting with the Midjourney API.
 abstract interface class MidjourneyClient {
