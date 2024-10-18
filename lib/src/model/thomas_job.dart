@@ -1,6 +1,6 @@
+import 'package:midjourney_api_dart/api.dart';
 
-
-// Model class for the Job data
+/// A class representing a Thomas job.
 class ThomasJob {
   final String id;
   final DateTime enqueueTime;
@@ -16,20 +16,21 @@ class ThomasJob {
   final bool published;
   final bool shown;
 
+  /// Creates a new instance of [ThomasJob].
   ThomasJob({
     required this.id,
     required this.enqueueTime,
-    this.parentId,
-    this.rating,
     required this.jobType,
     required this.eventType,
-    this.parentGrid,
     required this.fullCommand,
     required this.batchSize,
     required this.width,
     required this.height,
     required this.published,
     required this.shown,
+    this.parentId,
+    this.rating,
+    this.parentGrid,
   });
 
   // Equality and hashCode methods
@@ -107,8 +108,8 @@ class ThomasJob {
   }
 }
 
-// Model class for the root object
-class ThomasJobResponse {
+// The response class for the ThomasJob data
+class ThomasJobResponse extends MidjourneyResponse {
   final List<ThomasJob> data;
   final String cursor;
   final String checkpoint;
@@ -117,9 +118,10 @@ class ThomasJobResponse {
     required this.data,
     required this.cursor,
     required this.checkpoint,
+    super.additionalData,
   });
 
-  // fromJson factory
+  // Construct [ThomasJobResponse] from a JSON map
   factory ThomasJobResponse.fromJson(Map<String, dynamic> json) {
     var jobsJson = json['data'] as List;
     List<ThomasJob> jobsList = jobsJson.map((job) => ThomasJob.fromJson(job)).toList();
@@ -129,14 +131,5 @@ class ThomasJobResponse {
       cursor: json['cursor'],
       checkpoint: json['checkpoint'],
     );
-  }
-
-  // toJson method
-  Map<String, dynamic> toJson() {
-    return {
-      'data': data.map((job) => job.toJson()).toList(),
-      'cursor': cursor,
-      'checkpoint': checkpoint,
-    };
   }
 }

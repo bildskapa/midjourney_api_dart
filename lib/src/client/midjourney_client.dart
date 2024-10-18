@@ -76,7 +76,10 @@ base class MidjourneyClientBase implements MidjourneyClient {
       throw Exception('Unexpected JSON structure: $json');
     }
 
-    return ThomasJobResponse.fromJson(json);
+    final thomasResponse = ThomasJobResponse.fromJson(json);
+    _ensureTokensUpdated(thomasResponse);
+
+    return thomasResponse;
   }
 
   /// Submits an 'imagine' job to the Midjourney API.
@@ -92,7 +95,7 @@ base class MidjourneyClientBase implements MidjourneyClient {
     required MidjourneyFunction function,
     String? roomId,
   }) async {
-    final response = await _submitJobs(
+    final job = await _submitJobs(
       type: 'imagine',
       function: function,
       channelId: channelId,
@@ -107,7 +110,6 @@ base class MidjourneyClientBase implements MidjourneyClient {
       },
     );
 
-    final job = _parseJobResponse(response);
     _logger.trace('Submitted imagine job: $job');
 
     return job;
@@ -130,7 +132,7 @@ base class MidjourneyClientBase implements MidjourneyClient {
     required int index,
     String? roomId,
   }) async {
-    final response = await _submitJobs(
+    final job = await _submitJobs(
       type: 'upscale',
       function: function,
       channelId: channelId,
@@ -146,9 +148,6 @@ base class MidjourneyClientBase implements MidjourneyClient {
         },
       },
     );
-
-    final job = _parseJobResponse(response);
-
     _logger.trace('Submitted upscale job: $job');
 
     return job;
@@ -157,7 +156,7 @@ base class MidjourneyClientBase implements MidjourneyClient {
   /// Submits jobs to the Midjourney API.
   ///
   /// This is a private method used by both [imagine] and [upscale].
-  Future<Map<String, Object?>> _submitJobs({
+  Future<MidjourneyJobResponse> _submitJobs({
     required String type,
     required String channelId,
     required MidjourneyFunction function,
@@ -191,7 +190,10 @@ base class MidjourneyClientBase implements MidjourneyClient {
       throw Exception('Unexpected JSON structure: $json');
     }
 
-    return json;
+    final job = _parseJobResponse(json);
+    _ensureTokensUpdated(job);
+
+    return job;
   }
 
   Map<String, String> _getAuthHeaders({
@@ -207,6 +209,20 @@ base class MidjourneyClientBase implements MidjourneyClient {
       'content-type': 'application/json',
       'x-csrf-protection': '1',
     };
+  }
+
+  void _ensureTokensUpdated(MidjourneyResponse response) {
+    if (response.additionalData
+        case MidjourneyAdditionalData(
+          :final String authTokenV3I,
+          :final String authTokenV3R,
+        )) {
+      _configuration = MidjourneyClientConfiguration(
+        authUserTokenV3I: authTokenV3I,
+        authUserTokenV3R: authTokenV3R,
+        baseUrl: _effectiveConfiguration.baseUrl,
+      );
+    }
   }
 
   /// Parses the job response from the API.

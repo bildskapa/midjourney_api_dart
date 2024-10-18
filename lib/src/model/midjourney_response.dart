@@ -1,11 +1,45 @@
+class MidjourneyResponse {
+  /// Constructs a [MidjourneyResponse] with the final data and additional data.
+  const MidjourneyResponse({
+    this.additionalData,
+  });
+
+  final MidjourneyAdditionalData? additionalData;
+}
+
+class MidjourneyAdditionalData {
+  const MidjourneyAdditionalData({
+    this.authTokenV3I,
+    this.authTokenV3R,
+  });
+
+  final String? authTokenV3I;
+  final String? authTokenV3R;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MidjourneyAdditionalData &&
+          runtimeType == other.runtimeType &&
+          authTokenV3I == other.authTokenV3I &&
+          authTokenV3R == other.authTokenV3R;
+
+  @override
+  int get hashCode => authTokenV3I.hashCode ^ authTokenV3R.hashCode;
+
+  @override
+  String toString() => 'MidjourneyAdditionalData(authTokenV3I: $authTokenV3I, authTokenV3R: $authTokenV3R)';
+}
+
 /// Represents the response from a Midjourney imagine request.
 ///
 /// This class encapsulates both successful and failed job results.
-class MidjourneyJobResponse {
+class MidjourneyJobResponse extends MidjourneyResponse {
   /// Constructs a [MidjourneyJobResponse] with lists of successful and failed jobs.
   const MidjourneyJobResponse({
     required this.success,
     required this.failure,
+    super.additionalData,
   });
 
   /// List of successful imagine jobs.
@@ -33,12 +67,6 @@ class MidjourneyJobResponse {
 
     throw FormatException('Unexpected JSON structure for MidjourneyImagineResponse', json);
   }
-
-  /// Converts the object to a JSON map.
-  Map<String, Object?> toJson() => {
-        'success': success.map((job) => job.toJson()).toList(),
-        'failure': failure.map((job) => job.toJson()).toList(),
-      };
 
   @override
   bool operator ==(Object other) =>
