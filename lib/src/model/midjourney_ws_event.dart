@@ -154,7 +154,7 @@ class MidjourneyWSGenerationImage {
       other is MidjourneyWSGenerationImage && other.filename == filename && other.data == data;
 
   @override
-  String toString() => 'MidjourneyWSGenerationImage(filename: $filename, data: $data)';
+  String toString() => 'MidjourneyWSGenerationImage(filename: $filename, data: <base64data>)';
 }
 
 /// The status of a job submitted to the Midjourney API
