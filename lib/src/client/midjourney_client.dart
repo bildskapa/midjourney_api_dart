@@ -73,7 +73,7 @@ base class MidjourneyClientBase implements MidjourneyClient {
     final json = jsonDecode(response.body);
 
     if (json is! Map<String, Object?>) {
-      throw Exception('Unexpected JSON structure: $json');
+      throw FormatException('Unexpected JSON structure', json, 0);
     }
 
     final thomasResponse = ThomasJobResponse.fromJson(json);

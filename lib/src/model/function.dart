@@ -36,6 +36,7 @@ class MidjourneyFunction {
 }
 
 enum MidjourneyMode {
+  fast._('fast'),
   relaxed._('relaxed');
 
   final String value;
