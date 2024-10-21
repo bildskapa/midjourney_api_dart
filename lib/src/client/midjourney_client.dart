@@ -208,6 +208,7 @@ base class MidjourneyClientBase implements MidjourneyClient {
       'cookie': cookieBuilder.toString(),
       'content-type': 'application/json',
       'x-csrf-protection': '1',
+      'origin': effectiveConfiguration.baseUrl,
     };
   }
 
