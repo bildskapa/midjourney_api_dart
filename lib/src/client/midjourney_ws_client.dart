@@ -183,3 +183,16 @@ final class MidjourneyWSGenerationStatusUpdateEventFactory implements Midjourney
     return null;
   }
 }
+
+final class MidjourneyWSJobErrorEventFactory implements MidjourneyWSEventFactory {
+  @override
+  MidjourneyWSEvent? createFromWebSocketEvent(WebSocketEvent event) {
+    if (event is TextDataReceived) {
+      final data = jsonDecode(event.text);
+      if (data case {'type': 'job_error', 'job_id': String jobId, 'error': String error}) {
+        return MidjourneyWSJobErrorEvent(jobId: jobId, error: error);
+      }
+    }
+    return null;
+  }
+}
