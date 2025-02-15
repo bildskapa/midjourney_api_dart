@@ -189,8 +189,8 @@ final class MidjourneyWSJobErrorEventFactory implements MidjourneyWSEventFactory
   MidjourneyWSEvent? createFromWebSocketEvent(WebSocketEvent event) {
     if (event is TextDataReceived) {
       final data = jsonDecode(event.text);
-      if (data case {'type': 'job_error', 'job_id': String jobId, 'error': String error}) {
-        return MidjourneyWSJobErrorEvent(jobId: jobId, error: error);
+      if (data case {'type': 'job_error', 'job_id': String jobId, 'message': String message}) {
+        return MidjourneyWSJobErrorEvent(jobId: jobId, message: message);
       }
     }
     return null;

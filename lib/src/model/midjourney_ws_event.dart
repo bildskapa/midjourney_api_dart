@@ -28,23 +28,23 @@ final class MidjourneyWSJobSuccessEvent extends MidjourneyWSEvent {
 final class MidjourneyWSJobErrorEvent extends MidjourneyWSEvent {
   const MidjourneyWSJobErrorEvent({
     required this.jobId,
-    required this.error,
+    required this.message,
   });
 
   /// The error message
-  final String error;
+  final String message;
 
   /// The ID of the job that failed
   final String jobId;
 
   @override
-  int get hashCode => error.hashCode;
+  int get hashCode => message.hashCode;
 
   @override
-  bool operator ==(Object other) => other is MidjourneyWSJobErrorEvent && other.error == error;
+  bool operator ==(Object other) => other is MidjourneyWSJobErrorEvent && other.message == message;
 
   @override
-  String toString() => 'MidjourneyWSJobFailureEvent(error: $error)';
+  String toString() => 'MidjourneyWSJobFailureEvent(error: $message)';
 }
 
 /// Event that's emitted when the Midjourney Websocket is disconnected
