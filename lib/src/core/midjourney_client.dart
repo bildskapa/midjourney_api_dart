@@ -76,10 +76,10 @@ base class MidjourneyClientBase implements MidjourneyClient {
       throw FormatException('Unexpected JSON structure', json, 0);
     }
 
-    final thomasResponse = MidjourneyJobResponse.fromJson(json);
-    _ensureTokensUpdated(thomasResponse);
+    final midjourneyResponse = MidjourneyJobResponse.fromJson(json);
+    _ensureTokensUpdated(midjourneyResponse);
 
-    return thomasResponse;
+    return midjourneyResponse;
   }
 
   /// Submits an 'imagine' job to the Midjourney API.
