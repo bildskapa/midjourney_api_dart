@@ -59,7 +59,7 @@ base class MidjourneyClientBase implements MidjourneyClient {
     final userId = decodedToken.midjourneyId;
 
     final response = await _httpClient.get(
-      Uri.parse('${effectiveConfiguration.baseUrl}/imagine?user_id=$userId&page_size=$pageSize'),
+      Uri.parse('${effectiveConfiguration.baseUrl}/api/imagine?user_id=$userId&page_size=$pageSize'),
       headers: _getAuthHeaders(
         authUserTokenV3I: effectiveConfiguration.authUserTokenV3I,
         authUserTokenV3R: effectiveConfiguration.authUserTokenV3R,
