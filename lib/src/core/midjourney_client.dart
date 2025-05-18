@@ -49,7 +49,7 @@ base class MidjourneyClientBase implements MidjourneyClient {
       _configuration ?? (throw Exception('Configuration not set'));
 
   @override
-  Future<MidjourneyJobResponse> getJobs({
+  Future<MidjourneyJobsResponse> getJobs({
     required int pageSize,
   }) async {
     final decodedToken = const TokenValidator().validateAndDecodeAuthTokenV3I(
@@ -76,7 +76,7 @@ base class MidjourneyClientBase implements MidjourneyClient {
       throw FormatException('Unexpected JSON structure', json, 0);
     }
 
-    final midjourneyResponse = MidjourneyJobResponse.fromJson(json);
+    final midjourneyResponse = MidjourneyJobsResponse.fromJson(json);
     _ensureTokensUpdated(midjourneyResponse);
 
     return midjourneyResponse;

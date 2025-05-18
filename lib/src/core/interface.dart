@@ -37,7 +37,7 @@ abstract interface class MidjourneyClient {
   });
 
   /// Sends a getJobs request to the Midjourney API.
-  Future<MidjourneyJobResponse> getJobs({
+  Future<MidjourneyJobsResponse> getJobs({
     required int pageSize,
   });
 }
