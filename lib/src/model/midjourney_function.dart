@@ -35,6 +35,7 @@ class MidjourneyFunction {
       };
 }
 
+/// Represents the mode of a Midjourney function.
 enum MidjourneyMode {
   fast._('fast'),
   relaxed._('relaxed');

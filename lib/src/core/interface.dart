@@ -37,11 +37,12 @@ abstract interface class MidjourneyClient {
   });
 
   /// Sends a getJobs request to the Midjourney API.
-  Future<ThomasJobResponse> getJobs({
+  Future<MidjourneyJobResponse> getJobs({
     required int pageSize,
   });
 }
 
+/// An abstract interface class representing a client for interacting with the Midjourney WebSocket API.
 abstract interface class MidjourneyWSClient {
   /// Connects to the websocket server.
   ///

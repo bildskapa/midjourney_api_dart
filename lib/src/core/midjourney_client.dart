@@ -49,7 +49,7 @@ base class MidjourneyClientBase implements MidjourneyClient {
       _configuration ?? (throw Exception('Configuration not set'));
 
   @override
-  Future<ThomasJobResponse> getJobs({
+  Future<MidjourneyJobResponse> getJobs({
     required int pageSize,
   }) async {
     final decodedToken = const TokenValidator().validateAndDecodeAuthTokenV3I(
@@ -59,7 +59,7 @@ base class MidjourneyClientBase implements MidjourneyClient {
     final userId = decodedToken.midjourneyId;
 
     final response = await _httpClient.get(
-      Uri.parse('${effectiveConfiguration.baseUrl}/api/pg/thomas-jobs?user_id=$userId&page_size=$pageSize'),
+      Uri.parse('${effectiveConfiguration.baseUrl}/imagine?user_id=$userId&page_size=$pageSize'),
       headers: _getAuthHeaders(
         authUserTokenV3I: effectiveConfiguration.authUserTokenV3I,
         authUserTokenV3R: effectiveConfiguration.authUserTokenV3R,
@@ -76,7 +76,7 @@ base class MidjourneyClientBase implements MidjourneyClient {
       throw FormatException('Unexpected JSON structure', json, 0);
     }
 
-    final thomasResponse = ThomasJobResponse.fromJson(json);
+    final thomasResponse = MidjourneyJobResponse.fromJson(json);
     _ensureTokensUpdated(thomasResponse);
 
     return thomasResponse;

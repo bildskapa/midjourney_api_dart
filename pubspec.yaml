@@ -1,12 +1,10 @@
 name: midjourney_api_dart
-description: A sample command-line application.
+description: Unofficial dart client that provides a simple interface to interact with Midjourney API.
 version: 1.0.1
-# repository: https://github.com/my_org/my_repo
 
 environment:
   sdk: ^3.5.2
 
-# Add regular dependencies here.
 dependencies:
   web_socket: ^0.1.6
   http: ^1.2.2
