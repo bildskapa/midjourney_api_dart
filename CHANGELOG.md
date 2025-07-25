@@ -1,3 +1,7 @@
+## 1.0.3
+
+- Update submit-jobs API
+
 ## 1.0.2
 
 - Update to new API

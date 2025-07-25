@@ -172,7 +172,7 @@ base class MidjourneyClientBase implements MidjourneyClient {
     });
 
     final response = await _httpClient.post(
-      Uri.parse('${effectiveConfiguration.baseUrl}/api/app/submit-jobs'),
+      Uri.parse('${effectiveConfiguration.baseUrl}/api/submit-jobs'),
       body: jsonEncodedBody,
       headers: _getAuthHeaders(
         authUserTokenV3I: effectiveConfiguration.authUserTokenV3I,
