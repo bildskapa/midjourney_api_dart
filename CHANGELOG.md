@@ -1,3 +1,7 @@
+## 1.0.4
+
+- Use dio for http requests
+
 ## 1.0.3
 
 - Update submit-jobs API

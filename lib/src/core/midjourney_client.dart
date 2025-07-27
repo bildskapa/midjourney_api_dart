@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'package:midjourney_api_dart/api.dart';
 import 'package:midjourney_api_dart/src/utils/token_validator.dart';
 
@@ -32,12 +32,12 @@ base class MidjourneyClientBase implements MidjourneyClient {
   /// [httpClient] is optional and can be provided for custom HTTP handling.
   MidjourneyClientBase({
     required MidjourneyLogger logger,
-    http.Client? httpClient,
+    Dio? httpClient,
   })  : _logger = logger,
-        _httpClient = httpClient ?? http.Client();
+        _httpClient = httpClient ?? Dio();
 
   final MidjourneyLogger _logger;
-  final http.Client _httpClient;
+  final Dio _httpClient;
 
   MidjourneyClientConfiguration? _configuration;
 
@@ -58,19 +58,21 @@ base class MidjourneyClientBase implements MidjourneyClient {
 
     final userId = decodedToken.midjourneyId;
 
-    final response = await _httpClient.get(
-      Uri.parse('${effectiveConfiguration.baseUrl}/api/imagine?user_id=$userId&page_size=$pageSize'),
-      headers: _getAuthHeaders(
-        authUserTokenV3I: effectiveConfiguration.authUserTokenV3I,
-        authUserTokenV3R: effectiveConfiguration.authUserTokenV3R,
+    final response = await _httpClient.get<String>(
+      '${effectiveConfiguration.baseUrl}/api/imagine?user_id=$userId&page_size=$pageSize',
+      options: Options(
+        headers: _getAuthHeaders(
+          authUserTokenV3I: effectiveConfiguration.authUserTokenV3I,
+          authUserTokenV3R: effectiveConfiguration.authUserTokenV3R,
+        ),
       ),
     );
 
-    if (response.statusCode != 200) {
-      throw Exception('Failed to get jobs: ${response.statusCode} ${response.body}');
+    if (response.statusCode != 200 || response.data == null) {
+      throw Exception('Failed to get jobs: ${response.statusCode} ${response.data}');
     }
 
-    final json = jsonDecode(response.body);
+    final json = jsonDecode(response.data!);
 
     if (json is! Map<String, Object?>) {
       throw FormatException('Unexpected JSON structure', json, 0);
@@ -172,19 +174,21 @@ base class MidjourneyClientBase implements MidjourneyClient {
     });
 
     final response = await _httpClient.post(
-      Uri.parse('${effectiveConfiguration.baseUrl}/api/submit-jobs'),
-      body: jsonEncodedBody,
-      headers: _getAuthHeaders(
-        authUserTokenV3I: effectiveConfiguration.authUserTokenV3I,
-        authUserTokenV3R: effectiveConfiguration.authUserTokenV3R,
+      '${effectiveConfiguration.baseUrl}/api/submit-jobs',
+      data: jsonEncodedBody,
+      options: Options(
+        headers: _getAuthHeaders(
+          authUserTokenV3I: effectiveConfiguration.authUserTokenV3I,
+          authUserTokenV3R: effectiveConfiguration.authUserTokenV3R,
+        ),
       ),
     );
 
-    if (response.statusCode != 200) {
-      throw Exception('Failed to submit jobs: ${response.statusCode} ${response.body}');
+    if (response.statusCode != 200 || response.data == null) {
+      throw Exception('Failed to submit jobs: ${response.statusCode} ${response.data}');
     }
 
-    final json = jsonDecode(response.body);
+    final json = jsonDecode(response.data!);
 
     if (json is! Map<String, Object?>) {
       throw Exception('Unexpected JSON structure: $json');

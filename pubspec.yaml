@@ -1,13 +1,13 @@
 name: midjourney_api_dart
 description: Unofficial dart client that provides a simple interface to interact with Midjourney API.
-version: 1.0.3
+version: 1.0.4
 
 environment:
   sdk: ^3.5.2
 
 dependencies:
   web_socket: ^0.1.6
-  http: ^1.2.2
+  dio: ^5.8.0+1
   clock: ^1.1.1
   collection: ^1.18.0
   stack_trace: ^1.10.0
